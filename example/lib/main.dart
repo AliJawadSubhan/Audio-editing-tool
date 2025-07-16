@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:audio_editing_tool/src/controller/audio_controller.dart';
+import 'package:audio_editing_tool/src/helper/audio_helper.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(const MyApp());
@@ -87,24 +91,33 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ControllerDemoPage(),
+                  ),
+                );
+              },
+              child: const Text('Controller Demo'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HelperDemoPage(),
+                  ),
+                );
+              },
+              child: const Text('Helper Demo'),
+            ),
+            const SizedBox(height: 32),
             const Text(
               'You have pushed the button this many times:',
             ),
@@ -119,7 +132,468 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+    );
+  }
+}
+
+// Add stubs for the two demo pages
+class ControllerDemoPage extends StatefulWidget {
+  const ControllerDemoPage({super.key});
+
+  @override
+  State<ControllerDemoPage> createState() => _ControllerDemoPageState();
+}
+
+class _ControllerDemoPageState extends State<ControllerDemoPage> {
+  final AudioEditingController _controller = AudioEditingController();
+  String? _selectedFile;
+  String? _resultMessage;
+  bool _loading = false;
+  String? _outputPath;
+  String? _mergeFile;
+  String? _watermarkFile;
+  String? _crossfadeFile;
+
+  Future<void> _pickFile() async {
+    setState(() {
+      _loading = true;
+      _resultMessage = null;
+    });
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        _selectedFile = result.files.single.path;
+        _controller.setFilePath = _selectedFile!;
+        setState(() {});
+      }
+    } catch (e) {
+      setState(() {
+        _resultMessage = 'Error picking file: $e';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _pickMergeFile() async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        _mergeFile = result.files.single.path;
+        setState(() {});
+      }
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _pickWatermarkFile() async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        _watermarkFile = result.files.single.path;
+        setState(() {});
+      }
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _pickCrossfadeFile() async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        _crossfadeFile = result.files.single.path;
+        setState(() {});
+      }
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _runAllFeatures() async {
+    setState(() {
+      _loading = true;
+      _resultMessage = null;
+    });
+    try {
+      // 1. Trim
+      await _controller.trim(0, 2);
+      // 2. Change Volume
+      await _controller.changeVolume(0.5);
+      // 3. Change Speed
+      await _controller.changeSpeed(1.5);
+      // 4. Fade In
+      await _controller.fadeIn(1.0);
+      // 5. Fade Out
+      await _controller.fadeOut(1.0);
+      // 6. Convert (to mp3)
+      await _controller.convertTo('.mp3');
+      // 7. Compress
+      await _controller.compress();
+      // 8. Merge (if merge file selected)
+      if (_mergeFile != null) {
+        await _controller.mergeAudios([_mergeFile!]);
+      }
+      // 9. Watermark (if watermark file selected)
+      if (_watermarkFile != null) {
+        await _controller.addWaterMark(_watermarkFile!, true);
+      }
+      // 10. Crossfade (if crossfade file selected)
+      if (_crossfadeFile != null) {
+        await _controller.crossFade(_crossfadeFile!, 1.0);
+      }
+      setState(() {
+        _outputPath = _controller.filePath;
+        _resultMessage = 'All features applied! Output: $_outputPath';
+      });
+    } catch (e) {
+      setState(() {
+        _resultMessage = 'Error: $e';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Controller Demo')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ElevatedButton(
+                onPressed: _loading ? null : _pickFile,
+                child: const Text('Pick Audio File'),
+              ),
+              if (_selectedFile != null) ...[
+                const SizedBox(height: 16),
+                Text('Selected: $_selectedFile'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _loading ? null : _pickMergeFile,
+                  child: const Text('Pick File to Merge (optional)'),
+                ),
+                if (_mergeFile != null) Text('Merge File: $_mergeFile'),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _loading ? null : _pickWatermarkFile,
+                  child: const Text('Pick Watermark File (optional)'),
+                ),
+                if (_watermarkFile != null)
+                  Text('Watermark File: $_watermarkFile'),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _loading ? null : _pickCrossfadeFile,
+                  child: const Text('Pick Crossfade File (optional)'),
+                ),
+                if (_crossfadeFile != null)
+                  Text('Crossfade File: $_crossfadeFile'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _loading ? null : _runAllFeatures,
+                  child: const Text('Run All Features'),
+                ),
+              ],
+              if (_loading) ...[
+                const SizedBox(height: 16),
+                const Center(child: CircularProgressIndicator()),
+              ],
+              if (_resultMessage != null) ...[
+                const SizedBox(height: 16),
+                Text(_resultMessage!,
+                    style: const TextStyle(color: Colors.blue)),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class HelperDemoPage extends StatefulWidget {
+  const HelperDemoPage({super.key});
+
+  @override
+  State<HelperDemoPage> createState() => _HelperDemoPageState();
+}
+
+class _HelperDemoPageState extends State<HelperDemoPage> {
+  String? _selectedFile;
+  String? _resultMessage;
+  bool _loading = false;
+  String? _outputPath;
+  String? _mergeFile;
+  String? _watermarkFile;
+  String? _crossfadeFile;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  Future<void> _pickFile() async {
+    setState(() {
+      _loading = true;
+      _resultMessage = null;
+    });
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        _selectedFile = result.files.single.path;
+        setState(() {});
+      }
+    } catch (e) {
+      setState(() {
+        _resultMessage = 'Error picking file: $e';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _pickMergeFile() async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        _mergeFile = result.files.single.path;
+        setState(() {});
+      }
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _pickWatermarkFile() async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        _watermarkFile = result.files.single.path;
+        setState(() {});
+      }
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _pickCrossfadeFile() async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      final result = await FilePicker.platform.pickFiles(type: FileType.audio);
+      if (result != null && result.files.single.path != null) {
+        _crossfadeFile = result.files.single.path;
+        setState(() {});
+      }
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _playOutput() async {
+    if (_outputPath != null) {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(DeviceFileSource(_outputPath!));
+    }
+  }
+
+  Future<void> _runFeature(Future<(bool, String)> Function() feature) async {
+    setState(() {
+      _loading = true;
+      _resultMessage = null;
+      _outputPath = null;
+    });
+    try {
+      final result = await feature();
+      if (result.$1) {
+        setState(() {
+          _outputPath = result.$2;
+          _resultMessage = 'Success! Output: $_outputPath';
+        });
+      } else {
+        setState(() {
+          _resultMessage = 'Failed: ${result.$2}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _resultMessage = 'Error: $e';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Helper Demo')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ElevatedButton(
+                onPressed: _loading ? null : _pickFile,
+                child: const Text('Pick Audio File'),
+              ),
+              if (_selectedFile != null) ...[
+                const SizedBox(height: 16),
+                Text('Selected: $_selectedFile'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _loading
+                      ? null
+                      : () => _runFeature(
+                          () => AudioEditorHelper.trim(_selectedFile!, 0, 2)),
+                  child: const Text('Trim (first 2 seconds)'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading
+                      ? null
+                      : () => _runFeature(() =>
+                          AudioEditorHelper.changeVolume(_selectedFile!, 0.5)),
+                  child: const Text('Change Volume (0.5x)'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading
+                      ? null
+                      : () => _runFeature(() =>
+                          AudioEditorHelper.changeSpeed(_selectedFile!, 1.5)),
+                  child: const Text('Change Speed (1.5x)'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading
+                      ? null
+                      : () => _runFeature(
+                          () => AudioEditorHelper.fadeIn(_selectedFile!, 1.0)),
+                  child: const Text('Fade In (1s)'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading
+                      ? null
+                      : () => _runFeature(
+                          () => AudioEditorHelper.fadeOut(_selectedFile!, 1.0)),
+                  child: const Text('Fade Out (1s)'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading
+                      ? null
+                      : () => _runFeature(() =>
+                          AudioEditorHelper.convertTo(_selectedFile!, '.mp3')),
+                  child: const Text('Convert to .mp3'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading
+                      ? null
+                      : () => _runFeature(
+                          () => AudioEditorHelper.compress(_selectedFile!)),
+                  child: const Text('Compress'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading ? null : _pickMergeFile,
+                  child: const Text('Pick File to Merge (optional)'),
+                ),
+                if (_mergeFile != null) Text('Merge File: $_mergeFile'),
+                ElevatedButton(
+                  onPressed: _loading || _mergeFile == null
+                      ? null
+                      : () => _runFeature(() => AudioEditorHelper.mergeAudios(
+                          _selectedFile!, [_mergeFile!])),
+                  child: const Text('Merge Audios'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading ? null : _pickWatermarkFile,
+                  child: const Text('Pick Watermark File (optional)'),
+                ),
+                if (_watermarkFile != null)
+                  Text('Watermark File: $_watermarkFile'),
+                ElevatedButton(
+                  onPressed: _loading || _watermarkFile == null
+                      ? null
+                      : () => _runFeature(() => AudioEditorHelper.addWatermark(
+                          _selectedFile!, _watermarkFile!, true)),
+                  child: const Text('Add Watermark (at start)'),
+                ),
+                ElevatedButton(
+                  onPressed: _loading ? null : _pickCrossfadeFile,
+                  child: const Text('Pick Crossfade File (optional)'),
+                ),
+                if (_crossfadeFile != null)
+                  Text('Crossfade File: $_crossfadeFile'),
+                ElevatedButton(
+                  onPressed: _loading || _crossfadeFile == null
+                      ? null
+                      : () => _runFeature(() => AudioEditorHelper.crossFade(
+                          _selectedFile!, _crossfadeFile!, 1.0)),
+                  child: const Text('Crossfade (1s)'),
+                ),
+              ],
+              if (_outputPath != null) ...[
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _playOutput,
+                  child: const Text('Play Output'),
+                ),
+              ],
+              if (_loading) ...[
+                const SizedBox(height: 16),
+                const Center(child: CircularProgressIndicator()),
+              ],
+              if (_resultMessage != null) ...[
+                const SizedBox(height: 16),
+                Text(_resultMessage!,
+                    style: const TextStyle(color: Colors.blue)),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
