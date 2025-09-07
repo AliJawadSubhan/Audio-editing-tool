@@ -16,7 +16,12 @@ class AudioEditingController {
 
   /// Generates the temporary output file path for the next operation.
   Future<void> _getOutPutFilePath() async {
-    _tempOutPutPath = await FileServices().getOutputFilePath();
+    if (_filePath != null) {
+      _tempOutPutPath =
+          await FileServices().getOutputFilePath(_getFileExtension(_filePath!));
+    } else {
+      _tempOutPutPath = await FileServices().getOutputFilePath();
+    }
   }
 
   /// Trims the current audio between [start] and [end] seconds.
@@ -246,5 +251,11 @@ class AudioEditingController {
 
     _filePath = _tempOutPutPath;
     _getOutPutFilePath();
+  }
+
+  /// Helper method to extract file extension from file path
+  String _getFileExtension(String filePath) {
+    final extension = filePath.split('.').last.toLowerCase();
+    return '.$extension';
   }
 }

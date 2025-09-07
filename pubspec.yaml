@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   path_provider: ^2.1.5
-  ffmpeg_kit_flutter_full: 6.0.3-LTS
+  ffmpeg_kit_flutter_new: 3.2.0
   audioplayers: ^6.5.0
 
 

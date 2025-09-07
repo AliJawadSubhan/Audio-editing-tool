@@ -1,11 +1,9 @@
 // Includes helper functions that makes thing easy to work with Files.
-import 'dart:developer';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 class FileServices {
-  Future<String> getOutputFilePath() async {
+  Future<String> getOutputFilePath([String extension = '.mp3']) async {
     try {
       final dir = await getTemporaryDirectory();
       final outputDir = Directory('${dir.path}/audio_editor');
@@ -15,7 +13,7 @@ class FileServices {
       }
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      return '${outputDir.path}/$timestamp';
+      return '${outputDir.path}/$timestamp$extension';
     } catch (e) {
       rethrow;
     }

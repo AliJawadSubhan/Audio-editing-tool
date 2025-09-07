@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:audio_editing_tool/src/controller/audio_controller.dart';
 import 'package:audio_editing_tool/src/helper/audio_helper.dart';
@@ -449,6 +451,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
       } else {
         setState(() {
           _resultMessage = 'Failed: ${result.$2}';
+          log(_resultMessage.toString());
         });
       }
     } catch (e) {
