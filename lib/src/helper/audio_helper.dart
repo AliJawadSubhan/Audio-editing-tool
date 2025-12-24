@@ -3,6 +3,7 @@ import 'package:audio_editing_tool/src/file_services/file_service.dart';
 
 class AudioEditorHelper {
   /// Trims an audio file from [start] to [end] seconds.
+  /// The start and end time must be Input file's range.
   static Future<(bool success, String outputPath)> trim(
     String inputFilePath,
     double start,
@@ -19,6 +20,7 @@ class AudioEditorHelper {
   }
 
   /// Changes volume of [inputFilePath] by [factor].
+  /// e.g {2.0, 1.0, 0.5}
   static Future<(bool, String)> changeVolume(
     String inputFilePath,
     double factor,

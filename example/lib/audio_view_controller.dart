@@ -1,6 +1,7 @@
+import 'package:audio_editing_tool/audio_editing_tool.dart';
+import 'package:flutter/material.dart';
 import 'dart:developer';
 
-import 'package:example/audio_view_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:audio_editing_tool/src/controller/audio_controller.dart';
 import 'package:audio_editing_tool/src/helper/audio_helper.dart';
@@ -8,240 +9,24 @@ import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:developer' as dev; // Standard import for log()
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AudioViewController extends StatelessWidget {
+  const AudioViewController({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Audio Editing Tool Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Audio Editing Tool Demo'),
-    );
+    return ControllerDemoPage();
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class ControllerDemoPage extends StatefulWidget {
+  const ControllerDemoPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AudioViewController(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.settings),
-              label: const Text('Controller Demo'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HelperDemoPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.build),
-              label: const Text('Helper Demo'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  State<ControllerDemoPage> createState() => _ControllerDemoPageState();
 }
 
-// Helper function to get audio duration
-Future<double?> getAudioDuration(String filePath) async {
-  try {
-    final player = AudioPlayer();
-    await player.setSourceDeviceFile(filePath);
-    final duration = await player.getDuration();
-    await player.dispose();
-    return duration?.inSeconds.toDouble();
-  } catch (e) {
-    log('Error getting audio duration: $e');
-    return null;
-  }
-}
-
-// Audio Player Widget
-class AudioPlayerWidget extends StatefulWidget {
-  final String filePath;
-  final String label;
-
-  const AudioPlayerWidget({
-    super.key,
-    required this.filePath,
-    this.label = 'Audio',
-  });
-
-  @override
-  State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
-}
-
-class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
-  Duration _duration = Duration.zero;
-  Duration _position = Duration.zero;
-  bool _isPlaying = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initPlayer();
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      setState(() {
-        _isPlaying = state == PlayerState.playing;
-      });
-    });
-    _audioPlayer.onDurationChanged.listen((duration) {
-      setState(() {
-        _duration = duration;
-      });
-    });
-    _audioPlayer.onPositionChanged.listen((position) {
-      setState(() {
-        _position = position;
-      });
-    });
-  }
-
-  Future<void> _initPlayer() async {
-    await _audioPlayer.setSourceDeviceFile(widget.filePath);
-    final duration = await _audioPlayer.getDuration();
-    if (duration != null) {
-      setState(() {
-        _duration = duration;
-      });
-    }
-  }
-
-  Future<void> _playPause() async {
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.resume();
-    }
-  }
-
-  Future<void> _stop() async {
-    await _audioPlayer.stop();
-    await _audioPlayer.setSourceDeviceFile(widget.filePath);
-    setState(() {
-      _position = Duration.zero;
-    });
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
-  }
-
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.label,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Slider(
-              value: _duration.inMilliseconds > 0
-                  ? _position.inMilliseconds.toDouble()
-                  : 0.0,
-              max: _duration.inMilliseconds > 0
-                  ? _duration.inMilliseconds.toDouble()
-                  : 1.0,
-              onChanged: (value) async {
-                await _audioPlayer.seek(Duration(milliseconds: value.toInt()));
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(_formatDuration(_position)),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                      onPressed: _playPause,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.stop),
-                      onPressed: _stop,
-                    ),
-                  ],
-                ),
-                Text(_formatDuration(_duration)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class HelperDemoPage extends StatefulWidget {
-  const HelperDemoPage({super.key});
-
-  @override
-  State<HelperDemoPage> createState() => _HelperDemoPageState();
-}
-
-class _HelperDemoPageState extends State<HelperDemoPage> {
+class _ControllerDemoPageState extends State<ControllerDemoPage> {
+  final AudioEditingController _controller = AudioEditingController();
   String? _selectedFile;
   String? _outputFile;
   bool _loading = false;
@@ -273,8 +58,9 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
       final result = await FilePicker.platform.pickFiles(type: FileType.audio);
       if (result != null && result.files.single.path != null) {
         _selectedFile = result.files.single.path;
+        await _controller.init(_selectedFile!);
         _outputFile = _selectedFile;
-        _audioDuration = await getAudioDuration(_selectedFile!);
+        await _refreshDuration();
         if (_audioDuration != null) {
           _trimEnd = _audioDuration! > 10 ? 10.0 : _audioDuration!;
         }
@@ -288,6 +74,19 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
       setState(() {
         _loading = false;
       });
+    }
+  }
+
+  Future _refreshDuration() async {
+    try {
+      int durationF = await _controller.audioDuration();
+
+      setState(() {
+        _audioDuration = durationF / 1000;
+        _trimEnd = _audioDuration!;
+      });
+    } catch (e) {
+      log("Error getting audio furation $e");
     }
   }
 
@@ -320,135 +119,116 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
   Future<void> _applyTrim() async {
     if (_outputFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result =
-        await AudioEditorHelper.trim(_outputFile!, _trimStart, _trimEnd);
-    _handleResult(result);
+    await _applyFeature(() => _controller.trim(_trimStart, _trimEnd));
   }
 
   Future<void> _applyVolume() async {
     if (_outputFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result =
-        await AudioEditorHelper.changeVolume(_outputFile!, _volumeFactor);
-    _handleResult(result);
+    await _applyFeature(() => _controller.changeVolume(_volumeFactor));
   }
 
   Future<void> _applySpeed() async {
     if (_outputFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result =
-        await AudioEditorHelper.changeSpeed(_outputFile!, _speedFactor);
-    _handleResult(result);
+    await _applyFeature(() => _controller.changeSpeed(_speedFactor));
   }
 
   Future<void> _applyFadeIn() async {
     if (_outputFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result =
-        await AudioEditorHelper.fadeIn(_outputFile!, _fadeInDuration);
-    _handleResult(result);
+    await _applyFeature(() => _controller.fadeIn(_fadeInDuration));
   }
 
   Future<void> _applyFadeOut() async {
     if (_outputFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result =
-        await AudioEditorHelper.fadeOut(_outputFile!, _fadeOutDuration);
-    _handleResult(result);
+    await _applyFeature(() => _controller.fadeOut(_fadeOutDuration));
   }
 
   Future<void> _applyConvert() async {
     if (_outputFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result =
-        await AudioEditorHelper.convertTo(_outputFile!, _convertFormat);
-    _handleResult(result);
+    await _applyFeature(() => _controller.convertTo(_convertFormat));
   }
 
   Future<void> _applyCompress() async {
     if (_outputFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result = await AudioEditorHelper.compress(_outputFile!);
-    _handleResult(result);
+    await _applyFeature(() => _controller.compress());
   }
 
   Future<void> _applyMerge() async {
     if (_outputFile == null || _mergeFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result =
-        await AudioEditorHelper.mergeAudios(_outputFile!, [_mergeFile!]);
-    _handleResult(result);
+    await _applyFeature(() => _controller.mergeAudios([_mergeFile!]));
   }
 
   Future<void> _applyWatermark() async {
     if (_outputFile == null || _watermarkFile == null) return;
-    setState(() {
-      _loading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-    final result = await AudioEditorHelper.addWatermark(
-        _outputFile!, _watermarkFile!, _watermarkAtStart);
-    _handleResult(result);
+    await _applyFeature(
+        () => _controller.addWaterMark(_watermarkFile!, _watermarkAtStart));
   }
 
   Future<void> _applyCrossfade() async {
     if (_outputFile == null || _crossfadeFile == null) return;
+    await _applyFeature(
+        () => _controller.crossFade(_crossfadeFile!, _crossfadeDuration));
+  }
+
+  Future<void> _applyFeature(Future<void> Function() feature) async {
+    // Use a unique tag to filter in the IDE
+    const String tag = 'AUDIO_EDITOR';
+
     setState(() {
       _loading = true;
       _errorMessage = null;
       _successMessage = null;
     });
-    final result = await AudioEditorHelper.crossFade(
-        _outputFile!, _crossfadeFile!, _crossfadeDuration);
-    _handleResult(result);
-  }
 
-  void _handleResult((bool success, String result) result) {
-    setState(() {
-      _loading = false;
-      if (result.$1) {
-        _outputFile = result.$2;
+    final startTime = DateTime.now();
+
+    // ┌── START LOG ──┐
+    dev.log('┌──────────────────────────────────────────────────────────',
+        name: tag);
+    dev.log('│ 🚀 INITIATING FEATURE', name: tag);
+    dev.log('│ Started at: ${startTime.toIso8601String()}', name: tag);
+    dev.log('├──────────────────────────────────────────────────────────',
+        name: tag);
+
+    try {
+      await feature();
+
+      final duration = DateTime.now().difference(startTime);
+
+      setState(() {
+        _outputFile = _controller.filePath;
         _successMessage = 'Feature applied successfully!';
-        _errorMessage = null;
-      } else {
-        _errorMessage = 'Error: ${result.$2}';
-        _successMessage = null;
-      }
-    });
+        _audioDuration = null;
+      });
+
+      // Success Block
+      dev.log('│ ✅ SUCCESS', name: tag);
+      dev.log('│ Execution Time: ${duration.inMilliseconds}ms', name: tag);
+      dev.log('│ Output Path: ${_controller.filePath ?? "No file generated"}',
+          name: tag);
+      dev.log('└──────────────────────────────────────────────────────────',
+          name: tag);
+    } catch (e, stack) {
+      // Error Block
+      dev.log('│ ❌ ERROR DETECTED', name: tag);
+      dev.log('│ Message: $e', name: tag);
+      dev.log('├──────────────────────────────────────────────────────────',
+          name: tag);
+      dev.log('│ 🔍 STACK TRACE:', name: tag);
+
+      // Log the stack trace separately to keep it readable
+      dev.log(stack.toString(), name: tag);
+
+      dev.log('└──────────────────────────────────────────────────────────',
+          name: tag);
+
+      setState(() {
+        _errorMessage = 'Error: $e';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -462,7 +242,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Helper Demo')),
+      appBar: AppBar(title: const Text('Controller Demo')),
       body: _selectedFile == null
           ? Center(
               child: Column(
@@ -486,6 +266,13 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Audio Player
+                  GestureDetector(
+                    onTap: () {
+                      _refreshDuration();
+                    },
+                    child: Icon(Icons.refresh),
+                  ),
+
                   if (_outputFile != null)
                     AudioPlayerWidget(
                       filePath: _outputFile!,
@@ -879,6 +666,137 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
             ),
             const Divider(),
             child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AudioPlayerWidget extends StatefulWidget {
+  final String filePath;
+  final String label;
+
+  const AudioPlayerWidget({
+    super.key,
+    required this.filePath,
+    this.label = 'Audio',
+  });
+
+  @override
+  State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
+}
+
+class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initPlayer();
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      setState(() {
+        _isPlaying = state == PlayerState.playing;
+      });
+    });
+    _audioPlayer.onDurationChanged.listen((duration) {
+      setState(() {
+        _duration = duration;
+      });
+    });
+    _audioPlayer.onPositionChanged.listen((position) {
+      setState(() {
+        _position = position;
+      });
+    });
+  }
+
+  Future<void> _initPlayer() async {
+    await _audioPlayer.setSourceDeviceFile(widget.filePath);
+    final duration = await _audioPlayer.getDuration();
+    if (duration != null) {
+      setState(() {
+        _duration = duration;
+      });
+    }
+  }
+
+  Future<void> _playPause() async {
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.resume();
+    }
+  }
+
+  Future<void> _stop() async {
+    await _audioPlayer.stop();
+    await _audioPlayer.setSourceDeviceFile(widget.filePath);
+    setState(() {
+      _position = Duration.zero;
+    });
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.label,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Slider(
+              value: _duration.inMilliseconds > 0
+                  ? _position.inMilliseconds.toDouble()
+                  : 0.0,
+              max: _duration.inMilliseconds > 0
+                  ? _duration.inMilliseconds.toDouble()
+                  : 1.0,
+              onChanged: (value) async {
+                await _audioPlayer.seek(Duration(milliseconds: value.toInt()));
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(_formatDuration(_position)),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                      onPressed: _playPause,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.stop),
+                      onPressed: _stop,
+                    ),
+                  ],
+                ),
+                Text(_formatDuration(_duration)),
+              ],
+            ),
           ],
         ),
       ),

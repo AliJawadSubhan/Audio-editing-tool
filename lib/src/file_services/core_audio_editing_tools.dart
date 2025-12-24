@@ -2,6 +2,7 @@
 // import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 // ignore: depend_on_referenced_packages
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart' as ffmpeg;
+import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:path/path.dart' as p;
 
@@ -16,6 +17,36 @@ class CoreAudioEditingTools {
     } else {
       final logs = await session.getAllLogsAsString();
       return (false, logs ?? "Unable to get logs");
+    }
+  }
+
+  /// Output Unit: Milliseconds (ms)
+  /// Returns (true, int ms) on success or (false, String error) on failure.
+  static Future<(bool, Object)> getAudioDuration(String inputPath) async {
+    try {
+      final session = await FFprobeKit.execute(
+          '-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$inputPath"');
+
+      final rc = await session.getReturnCode();
+
+      if (ReturnCode.isSuccess(rc)) {
+        final output = await session.getOutput();
+        if (output != null && output.trim().isNotEmpty) {
+          // Parse the raw seconds from FFprobe (e.g., "124.560000")
+          final double seconds = double.parse(output.trim());
+
+          // Convert to whole milliseconds
+          final int ms = (seconds * 1000).toInt();
+
+          return (true, ms); // Explicitly returning an int
+        }
+        return (false, "Duration output was empty.");
+      } else {
+        final logs = await session.getAllLogsAsString();
+        return (false, logs ?? "FFprobe failed to read file metadata.");
+      }
+    } catch (e) {
+      return (false, "Exception during probe: ${e.toString()}");
     }
   }
 
