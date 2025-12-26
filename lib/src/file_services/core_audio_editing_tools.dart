@@ -160,19 +160,34 @@ class CoreAudioEditingTools {
   }
 
   static Future<(bool, String)> mergeAudios(
-    List<String> inputPaths,
-    String outputPath,
-  ) async {
+      List<String> inputPaths, String outputPath,
+      {int startOffsetMs = 0}) async {
     if (inputPaths.length < 2) {
-      return (false, 'Need at least two audio files to merge');
+      return (false, 'At least 2 audio files are required.');
     }
 
-    // Build input args: -i "file1" -i "file2" ...
-    final inputArgs = inputPaths.map((p) => '-i "$p"').join(' ');
-    final amixFilter =
-        'amix=inputs=${inputPaths.length}:duration=longest:dropout_transition=2';
+    final base = inputPaths.first;
+    final others = inputPaths.sublist(1);
 
-    final command = '-y $inputArgs -filter_complex "$amixFilter" "$outputPath"';
+    // Input args
+    final inputArgs = inputPaths.map((p) => '-i "$p"').join(' ');
+
+    // Delay secondary audios
+    final delayedInputs = <String>[];
+    for (int i = 0; i < others.length; i++) {
+      delayedInputs.add(
+          '[${i + 1}:a]adelay=${startOffsetMs}|${startOffsetMs}[a${i + 1}]');
+    }
+
+    // Mix base + delayed audios
+    final mixInputs =
+        ['[0:a]', ...List.generate(others.length, (i) => '[a${i + 1}]')].join();
+
+    final filterComplex =
+        '${delayedInputs.join(';')};$mixInputs amix=inputs=${inputPaths.length}:duration=longest:dropout_transition=2';
+
+    final command =
+        '-y $inputArgs -filter_complex "$filterComplex" "$outputPath"';
 
     return _runFFmpeg(command, outputPath);
   }

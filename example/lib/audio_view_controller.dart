@@ -2,9 +2,6 @@ import 'package:audio_editing_tool/audio_editing_tool.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
-import 'package:audio_editing_tool/src/controller/audio_controller.dart';
-import 'package:audio_editing_tool/src/helper/audio_helper.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:developer' as dev; // Standard import for log()
@@ -14,7 +11,7 @@ class AudioViewController extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ControllerDemoPage();
+    return const ControllerDemoPage();
   }
 }
 
@@ -60,6 +57,7 @@ class _ControllerDemoPageState extends State<ControllerDemoPage> {
         _selectedFile = result.files.single.path;
         await _controller.init(_selectedFile!);
         _outputFile = _selectedFile;
+        log("Audio Pick File Path: ${_controller.filePath}");
         await _refreshDuration();
         if (_audioDuration != null) {
           _trimEnd = _audioDuration! > 10 ? 10.0 : _audioDuration!;

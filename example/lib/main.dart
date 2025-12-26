@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:example/audio_view_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:audio_editing_tool/src/controller/audio_controller.dart';
@@ -8,7 +9,14 @@ import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:developer' as dev; // Standard import for log()
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // bool success = await openDownloadFolder();
+  // if (success) {
+  //   print('Download folder opened successfully.');
+  // } else {
+  //   print('Failed to open download folder.');
+  // }
   runApp(const MyApp());
 }
 
@@ -495,6 +503,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Trim Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Trim Audio',
                     icon: Icons.content_cut,
                     child: Column(
@@ -554,6 +563,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Volume Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Change Volume',
                     icon: Icons.volume_up,
                     child: Column(
@@ -581,6 +591,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Speed Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Change Speed',
                     icon: Icons.speed,
                     child: Column(
@@ -607,6 +618,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Fade In Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Fade In',
                     icon: Icons.trending_up,
                     child: Column(
@@ -634,6 +646,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Fade Out Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Fade Out',
                     icon: Icons.trending_down,
                     child: Column(
@@ -661,6 +674,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Convert Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Convert Format',
                     icon: Icons.transform,
                     child: Column(
@@ -694,6 +708,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Compress Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Compress Audio',
                     icon: Icons.compress,
                     child: ElevatedButton(
@@ -704,6 +719,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Merge Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Merge Audios',
                     icon: Icons.merge_type,
                     child: Column(
@@ -735,6 +751,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Watermark Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Add Watermark',
                     icon: Icons.water_drop,
                     child: Column(
@@ -775,6 +792,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
 
                   // Crossfade Section
                   _buildFeatureCard(
+                    context: context,
                     title: 'Crossfade',
                     icon: Icons.blur_on,
                     child: Column(
@@ -859,6 +877,7 @@ class _HelperDemoPageState extends State<HelperDemoPage> {
     required String title,
     required IconData icon,
     required Widget child,
+    required BuildContext context,
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),

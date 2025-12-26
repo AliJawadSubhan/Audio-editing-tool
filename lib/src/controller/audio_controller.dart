@@ -198,6 +198,7 @@ class AudioEditingController {
     final result = await CoreAudioEditingTools.mergeAudios(
       allInputs,
       _tempOutPutPath!,
+      startOffsetMs: 5000,
     );
 
     if (result.$1) {
