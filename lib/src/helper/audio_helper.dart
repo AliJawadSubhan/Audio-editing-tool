@@ -2,6 +2,12 @@ import 'package:audio_editing_tool/src/file_services/core_audio_editing_tools.da
 import 'package:audio_editing_tool/src/file_services/file_service.dart';
 
 class AudioEditorHelper {
+  static final _fileService = FileServices();
+
+  static Future<void> dispose() async {
+    await _fileService.dispose();
+  }
+
   /// Trims an audio file from [start] to [end] seconds.
   /// The start and end time must be Input file's range.
   static Future<(bool success, String outputPath)> trim(
@@ -9,8 +15,9 @@ class AudioEditorHelper {
     double start,
     double end,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
+    // .getOutputFilePath(_getFileExtension(inputFilePath));
     return CoreAudioEditingTools.trimAudio(
       inputFilePath,
       outputPath,
@@ -25,8 +32,9 @@ class AudioEditorHelper {
     String inputFilePath,
     double factor,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
+    // .getOutputFilePath(_getFileExtension(inputFilePath));
     return CoreAudioEditingTools.changeVolume(
       inputFilePath,
       outputPath,
@@ -39,8 +47,9 @@ class AudioEditorHelper {
     String inputFilePath,
     double factor,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
+    // .getOutputFilePath(_getFileExtension(inputFilePath));
     return CoreAudioEditingTools.changeSpeed(
       inputFilePath,
       outputPath,
@@ -53,8 +62,9 @@ class AudioEditorHelper {
     String inputFilePath,
     double durationSeconds,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
+    // .getOutputFilePath(_getFileExtension(inputFilePath));
     return CoreAudioEditingTools.fadeIn(
       inputFilePath,
       outputPath,
@@ -67,8 +77,9 @@ class AudioEditorHelper {
     String inputFilePath,
     double durationSeconds,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
+    // .getOutputFilePath(_getFileExtension(inputFilePath));
     return CoreAudioEditingTools.fadeOutAuto(
       inputFilePath,
       outputPath,
@@ -91,8 +102,9 @@ class AudioEditorHelper {
   static Future<(bool, String)> compress(
     String inputFilePath,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
+    // .getOutputFilePath(_getFileExtension(inputFilePath));
     return CoreAudioEditingTools.compressAudio(
       inputFilePath,
       outputPath,
@@ -104,8 +116,9 @@ class AudioEditorHelper {
     String inputFilePath,
     List<String> otherFiles,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
+    // .getOutputFilePath(_getFileExtension(inputFilePath));
     final allInputs = [inputFilePath, ...otherFiles];
     return CoreAudioEditingTools.mergeAudios(
       allInputs,
@@ -119,8 +132,9 @@ class AudioEditorHelper {
     String watermarkAudio,
     bool placeAtStart,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
+    // .getOutputFilePath(_getFileExtension(inputFilePath));
     return CoreAudioEditingTools.addWatermark(
       inputFilePath,
       outputPath,
@@ -135,8 +149,8 @@ class AudioEditorHelper {
     String nextAudio,
     double durationSeconds,
   ) async {
-    final outputPath = await FileServices()
-        .getOutputFilePath(_getFileExtension(inputFilePath));
+    final outputPath =
+        await _fileService.getOutputFilePath(_getFileExtension(inputFilePath));
     return CoreAudioEditingTools.crossfade(
       inputFilePath,
       nextAudio,

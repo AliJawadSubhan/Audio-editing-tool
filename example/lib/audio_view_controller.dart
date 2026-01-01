@@ -167,6 +167,38 @@ class _ControllerDemoPageState extends State<ControllerDemoPage> {
         () => _controller.crossFade(_crossfadeFile!, _crossfadeDuration));
   }
 
+  Future<void> _handleUndo() async {
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+      _successMessage = null;
+    });
+
+    try {
+      final success = await _controller.undo();
+      if (success) {
+        setState(() {
+          _outputFile = _controller.filePath;
+          _successMessage = 'Undo successful!';
+          _audioDuration = null;
+        });
+        await _refreshDuration();
+      } else {
+        setState(() {
+          _errorMessage = 'Nothing to undo';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error during undo: $e';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
   Future<void> _applyFeature(Future<void> Function() feature) async {
     // Use a unique tag to filter in the IDE
     const String tag = 'AUDIO_EDITOR';
@@ -263,6 +295,40 @@ class _ControllerDemoPageState extends State<ControllerDemoPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Undo Button
+                  if (_controller.canUndo)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.undo, color: Colors.blue),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Edit History (${_controller.editedAudioFiles.length} edits)',
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                              ],
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: _loading ? null : _handleUndo,
+                              icon: const Icon(Icons.undo),
+                              label: const Text('Undo'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (_controller.canUndo) const SizedBox(height: 16),
+
                   // Audio Player
                   GestureDetector(
                     onTap: () {
@@ -694,18 +760,25 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   @override
   void initState() {
     super.initState();
+
     _initPlayer();
+
     _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (!mounted) return;
       setState(() {
         _isPlaying = state == PlayerState.playing;
       });
     });
+
     _audioPlayer.onDurationChanged.listen((duration) {
+      if (!mounted) return;
       setState(() {
         _duration = duration;
       });
     });
+
     _audioPlayer.onPositionChanged.listen((position) {
+      if (!mounted) return;
       setState(() {
         _position = position;
       });
