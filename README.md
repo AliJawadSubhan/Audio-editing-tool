@@ -5,9 +5,9 @@ Lightweight audio editing for Flutter with an easy, practical API :)
 ## Screenshots
 
 <p align="start">
-  <img src="app_ss_1.png" width="200" alt="App Screenshot 1" />
-  <img src="app_ss_2.png" width="200" alt="App Screenshot 2" />
-  <img src="app_ss_3.png" width="200" alt="App Screenshot 3" />
+  <img src="https://raw.githubusercontent.com/AliJawadSubhan/Audio-editing-tool/refs/heads/main/app_ss_1.png" width="200" alt="App Screenshot 1" />
+  <img src="https://raw.githubusercontent.com/AliJawadSubhan/Audio-editing-tool/refs/heads/main/app_ss_2.png" width="200" alt="App Screenshot 2" />
+  <img src="https://raw.githubusercontent.com/AliJawadSubhan/Audio-editing-tool/refs/heads/main/app_ss_3.png" width="200" alt="App Screenshot 3" />
 </p>
 
 ## Features
