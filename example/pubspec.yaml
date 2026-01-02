@@ -30,7 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audio_editing_tool:
+  Audio_editing_tool:
     path: ../
 
   # The following adds the Cupertino Icons font to your application.
