@@ -4,9 +4,11 @@ Lightweight audio editing for Flutter with an easy, practical API :)
 
 ## Screenshots
 
-![App Screenshot](app_ss_1.png)
-![App Screenshot 2](app_ss_2.png)
-![App Screenshot 3](app_ss_3.png)
+<p align="start">
+  <img src="app_ss_1.png" width="200" alt="App Screenshot 1" />
+  <img src="app_ss_2.png" width="200" alt="App Screenshot 2" />
+  <img src="app_ss_3.png" width="200" alt="App Screenshot 3" />
+</p>
 
 ## Features
 
@@ -72,6 +74,7 @@ await controller.dispose();
 
 The `AudioEditorHelper` provides static methods for individual operations. Suitable for simple, stateless audio processing.
 
+```dart
 // Change volume (factor: 2.0 = double, 0.5 = half)
 final volumeResult = await AudioEditorHelper.changeVolume('/path/to/audio.mp3', 1.5);
 
