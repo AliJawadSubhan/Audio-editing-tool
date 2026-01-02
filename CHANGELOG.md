@@ -1,3 +1,4 @@
-## 0.0.1
+## 1.0.0
 
-* TODO: Describe initial release.
+* Initial release of audio_editing_tool.
+* Audio editing utilities using FFmpeg.
