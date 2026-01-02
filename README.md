@@ -99,7 +99,6 @@ await AudioEditorHelper.dispose();
 
 **Use the Controller when:**
 * You need to maintain edit history and undo functionality
-* You want automatic temporary file management
 * You're building an interactive audio editing interface
 
 **Use the Helper when:**
