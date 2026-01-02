@@ -107,6 +107,6 @@ await AudioEditorHelper.dispose();
 
 ## Additional Information
 
-All operations are asynchronous and return results that you should handle appropriately. The controller automatically manages temporary files created during editing sessions, while the helper & controller methods require manual cleanup using `AudioEditorHelper.dispose()` when finished with a batch of operations.
+Both the Controller and Helper classes require a manual dispose() call once you are finished using them to free up temporary files on the disk.
 
 For complete examples, see the `/example` directory in this package.
