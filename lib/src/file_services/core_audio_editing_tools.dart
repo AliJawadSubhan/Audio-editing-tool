@@ -166,7 +166,6 @@ class CoreAudioEditingTools {
       return (false, 'At least 2 audio files are required.');
     }
 
-    final base = inputPaths.first;
     final others = inputPaths.sublist(1);
 
     // Input args
@@ -176,7 +175,7 @@ class CoreAudioEditingTools {
     final delayedInputs = <String>[];
     for (int i = 0; i < others.length; i++) {
       delayedInputs.add(
-          '[${i + 1}:a]adelay=${startOffsetMs}|${startOffsetMs}[a${i + 1}]');
+          '[${i + 1}:a]adelay=$startOffsetMs|$startOffsetMs[a${i + 1}]');
     }
 
     // Mix base + delayed audios
