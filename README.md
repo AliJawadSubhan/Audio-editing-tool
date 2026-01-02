@@ -1,12 +1,12 @@
 # Audio Editing Tool
 
-A Flutter package that provides comprehensive audio editing capabilities through an easy-to-use controller-based API and static helper methods. Perform operations like trimming, volume adjustment, speed changes, format conversion, and more with minimal setup.
+Lightweight audio editing for Flutter with an easy, practical API :)
 
 ## Screenshots
 
-<!-- Add your app screenshots here -->
-![App Screenshot](screenshots/main.png)
-![Editing Interface](screenshots/editing.png)
+![App Screenshot](app_ss_1.png)
+![App Screenshot 2](app_ss_2.png)
+![App Screenshot 3](app_ss_3.png)
 
 ## Features
 
@@ -15,7 +15,6 @@ A Flutter package that provides comprehensive audio editing capabilities through
 * **Speed adjustment** - Change playback speed while preserving pitch
 * **Fade effects** - Apply fade-in and fade-out transitions
 * **Format conversion** - Convert between audio formats (MP3, WAV & etc.)
-* **Compression** - Reduce file size with quality-preserving compression
 * **Audio merging** - Combine multiple audio files into one
 * **Feel free to explore more**
 
@@ -25,7 +24,7 @@ Add this package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  audio_editing_tool: ^0.0.1
+  audio_editing_tool: ^1.0.0
 ```
 
 Then import the package in your Dart file:
@@ -36,7 +35,7 @@ import 'package:audio_editing_tool/audio_editing_tool.dart';
 
 ## Usage
 
-This package offers two approaches to audio editing: the **Controller** pattern for stateful editing sessions with history tracking, and the **Helper** pattern for one-off operations.
+This package offers two approaches to audio editing: the **Controller** pattern for stateful editing sessions with history tracking, and the **Helper** pattern for one-off operations (Aka, Fire and Forget without dispose).
 
 ### Using the Controller
 
@@ -50,7 +49,6 @@ await controller.init('/path/to/audio.mp3');
 // Perform editing operations
 await controller.trim(10.0, 30.0);  // Trim from 10s to 30s
 await controller.changeVolume(1.5);  // Increase volume by 50%
-await controller.changeSpeed(1.25);  // Speed up by 25%
 
 // Get the current edited file path
 String? currentFile = controller.filePath;
@@ -106,6 +104,6 @@ await AudioEditorHelper.dispose();
 
 ## Additional Information
 
-All operations are asynchronous and return results that you should handle appropriately. The controller automatically manages temporary files created during editing sessions, while the helper methods require manual cleanup using `AudioEditorHelper.dispose()` when finished with a batch of operations.
+All operations are asynchronous and return results that you should handle appropriately. The controller automatically manages temporary files created during editing sessions, while the helper & controller methods require manual cleanup using `AudioEditorHelper.dispose()` when finished with a batch of operations.
 
 For complete examples, see the `/example` directory in this package.

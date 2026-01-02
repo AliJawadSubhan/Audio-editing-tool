@@ -8,15 +8,15 @@ class AudioEditingController {
   String? _tempOutPutPath;
   String? _originalFilePath;
 
-  /// Keeps track of all temporary files created during this session for cleanup.
   final List<String> _sessionFiles = [];
 
   /// Current index in the edit history. -1 means original file, 0 means first edit, etc.
   int _currentHistoryIndex = -1;
 
+  /// Returns the list of all edited audio files for histroy
   List<String> get editedAudioFiles => _sessionFiles;
 
-  /// Sets the current audio file path and initializes a new output path.
+  /// Sets the current audio file path.
   Future<void> init(String path) async {
     _filePath = path;
     _originalFilePath = path;
@@ -27,7 +27,6 @@ class AudioEditingController {
   /// Returns the currently edited file path.
   String? get filePath => _filePath;
 
-  /// Returns true if undo is possible (there's a previous version to go back to).
   bool get canUndo => _currentHistoryIndex >= 0;
 
   /// Reverts to the previous version of the audio file.
@@ -36,11 +35,9 @@ class AudioEditingController {
     if (!canUndo) return false;
 
     if (_currentHistoryIndex == 0) {
-      // Go back to original file
       _filePath = _originalFilePath;
       _currentHistoryIndex = -1;
     } else if (_currentHistoryIndex > 0) {
-      // Go back to previous edit
       _currentHistoryIndex--;
       _filePath = _sessionFiles[_currentHistoryIndex];
     }
@@ -51,7 +48,6 @@ class AudioEditingController {
 
   final fileService = FileServices();
 
-  /// Generates the temporary output file path for the next operation.
   Future<void> _getOutPutFilePath() async {
     if (_filePath != null) {
       _tempOutPutPath =
@@ -61,17 +57,12 @@ class AudioEditingController {
     }
   }
 
-  /// Atomic update to ensure file state only changes on successful operations.
   void _handleSuccess(String newPath) {
     _filePath = newPath;
 
-    // If we're not at the latest version (i.e., we've undone), remove future edits
-    // This implements the standard undo/redo behavior: new edits after undo replace future history
     if (_currentHistoryIndex == -1) {
-      // Undone to original file - clear all session files
       _sessionFiles.clear();
     } else if (_currentHistoryIndex < _sessionFiles.length - 1) {
-      // Undone to a middle position - remove all edits after current position
       _sessionFiles.removeRange(_currentHistoryIndex + 1, _sessionFiles.length);
     }
 
@@ -302,7 +293,7 @@ class AudioEditingController {
     return '.$extension';
   }
 
-  /// Deletes all intermediate temporary files created during the editing session.
+  /// Deletes all temporary files created during the editing session.
   Future<void> dispose() async {
     await fileService.dispose();
     _sessionFiles.clear();
