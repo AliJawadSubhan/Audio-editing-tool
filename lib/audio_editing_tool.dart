@@ -1,4 +1,4 @@
-library Audio_editing_tool;
+library audio_editing_tool;
 
 export "src/controller/audio_controller.dart";
 export "src/helper/audio_helper.dart";
