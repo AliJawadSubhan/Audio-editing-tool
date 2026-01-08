@@ -1,26 +1,25 @@
-name: Audio_editing_tool
+name: audio_editing_tool
 description: "An audio editor tool to make working with audios easy!"
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/AliJawadSubhan/Audio-editing-tool
 repository: https://github.com/AliJawadSubhan/Audio-editing-tool
 
 environment:
-  sdk: '>=3.4.3 <4.0.0'
-  flutter: ">=3.0.0"  
+  sdk: ">=3.4.3 <4.0.0"
+  flutter: ">=3.0.0"
 
 dependencies:
-  file_picker: ^8.1.2
+  file_picker: ^10.3.8
   flutter:
     sdk: flutter
   path_provider: ^2.1.5
-  
-  ffmpeg_kit_flutter_new: ^3.2.0
+  ffmpeg_kit_flutter_new: ^4.1.0
   path: ^1.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

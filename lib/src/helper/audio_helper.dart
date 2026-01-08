@@ -1,5 +1,5 @@
-import 'package:Audio_editing_tool/src/file_services/core_audio_editing_tools.dart';
-import 'package:Audio_editing_tool/src/file_services/file_service.dart';
+import 'package:audio_editing_tool/src/file_services/core_audio_editing_tools.dart';
+import 'package:audio_editing_tool/src/file_services/file_service.dart';
 
 class AudioEditorHelper {
   static final _fileService = FileServices();
